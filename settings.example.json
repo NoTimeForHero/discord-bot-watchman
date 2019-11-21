@@ -1,0 +1,7 @@
+{
+    "bot_token": "discord_bot_token",
+    "prefix": "bot_command_prefix",
+    "admins": [
+        "List", "of", "admins", "user", "ids"
+    ]
+}
