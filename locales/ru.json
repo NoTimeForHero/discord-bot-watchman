@@ -1,0 +1,16 @@
+{
+	"uptime_message": "Бот запущен %s",
+	"command_description_help": "Отображает все доступные команды",
+	"command_description_uptime": "Показывает сколько времени прошло с запуска бота",
+	"command_description_trusted": "Управление администраторами бота",
+	"command_description_trusted_add": "Добавить администратора",
+	"command_description_trusted_del": "Удалить администратора",
+	"command_description_trusted_list": "Просмотреть список администраторов",
+	"unknown_subcommand": "Неизвестная под-команда '%s'",
+	"unknown_command": "Неизвестная команда '%s'",
+	"trusted_list": "Список администраторов: %s",
+	"argument_error_no_users": "Ошибка: не перечислены пользователи для выполнения!",
+	"users_added_to_trusted": "Пользователи были добавлены в администраторы: %s",
+    "users_removed_from_trusted": "Пользователи были удалены из администраторов: %s",
+    "unauthorized_user": "Недостаточно прав доступа!"
+}

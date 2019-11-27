@@ -6,6 +6,7 @@ class Commands {
         this.security = container.security;
         this.utils = container.utils;
         this.botState = container.botState;
+        this.moment = container.moment;
 
         this.methods = {
             'help': { 'function': this.help },            
@@ -24,16 +25,16 @@ class Commands {
         if (args[0] !== this.prefix) return;        
         const command = args.splice(0, 2)[1];
         if (!command) return;
-        let func = this.methods[command] ? this.methods[command].function : this.defaultCommand;
-        func.apply(this, [ev, ...args]);
-    }
-
-    defaultCommand(ev) {
-        ev.reply(this.i18n.__('unknown_command'));  
+        if (!this.methods[command]) {
+            ev.reply(this.i18n.__('unknown_command', command));  
+            return;
+        }
+        this.methods[command].function.apply(this, [ev, ...args]);
     }
 
     uptime(ev) {
-        ev.reply(this.i18n.__('uptime_message', this.botState.startedAt));
+        const date = this.moment(this.botState.startedAt).fromNow();
+        ev.reply(this.i18n.__('uptime_message', date));
     }
 
     help(ev) {
@@ -62,7 +63,7 @@ class Commands {
         const withUsers = (ev, callback) => {
             const ids = this.utils.findUsersByMessage(ev);
             if (ids.length < 1) {
-                ev.reply(this.i18n.__('no_users'));                        
+                ev.reply(this.i18n.__('argument_error_no_users'));                        
                 return;
             }
             const names = ids.map(x => `<@${x}>`).join(', ');            
