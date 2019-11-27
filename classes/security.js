@@ -7,7 +7,15 @@ class Security {
     addUsers(users) {
         if (!Array.isArray(users)) users = [users];
         this.trustedUsers = this.trustedUsers.concat(users);
-        console.log(this.trustedUsers);
+    }
+
+    delUsers(users) {
+        if (!Array.isArray(users)) users = [users];
+        this.trustedUsers = this.trustedUsers.filter(id => !users.includes(id));
+    }
+
+    listUsers() {
+        return [...this.admins, ...this.trustedUsers];
     }
 
     isTrusted(user) {

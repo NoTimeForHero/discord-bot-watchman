@@ -1,6 +1,6 @@
 class FakeI18N {
     __() {
-        const data = [...arguments].join(' ');
+        const data = [...arguments].join(' ').trimRight();
         console.log('FakeI18N: ' + data);
         return data;
     }
