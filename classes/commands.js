@@ -9,6 +9,7 @@ class Commands {
         this.utils = container.utils;
         this.botState = container.botState;
         this.moment = container.moment;
+        this.database = container.database;
 
         this.methods = {
             'help': {
@@ -18,6 +19,11 @@ class Commands {
             'uptime': {
                 'allowed_in_PM': true,
                 'function': this.uptime
+            },
+            'refresh': {
+                ['function'](ev) {
+                    ev.reply(this.i18n.__('under_construction'))
+                }
             },
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
@@ -67,8 +73,9 @@ class Commands {
         ev.reply(message);
     }
 
-    trusted(ev, action) {
-        if (!this.security.isTrusted(ev.author)) {
+    async trusted(ev, action) {
+        const isTrusted = await this.security.isTrusted(ev.channel.guild.id, ev.author.id);
+        if (!isTrusted) {
             ev.reply(this.i18n.__('unauthorized_user'));
             return;            
         }        
@@ -86,18 +93,19 @@ class Commands {
         switch (action) {
             case 'add':
                 withUsers(ev, (ids, names) => {
-                    this.security.addUsers(ids);            
+                    this.security.addUsers(ev.channel.guild.id, ids);            
                     ev.reply(this.i18n.__('users_added_to_trusted', names));                        
                 })
                 return;
             case 'del':
                 withUsers(ev, (ids, names) => {
-                    this.security.delUsers(ids);
+                    this.security.delUsers(ev.channel.guild.id, ids);
                     ev.reply(this.i18n.__('users_removed_from_trusted', names));                        
                 });
                 return;
             case 'list':
-                const list = this.security.listUsers().map(id => `<@${id}>`).join(', ');
+                let list = await this.security.listUsers(ev.channel.guild.id);
+                list = list.map(id => `<@${id}>`).join(', ');
                 ev.reply(this.i18n.__('trusted_list', list));                        
                 return;
             default:

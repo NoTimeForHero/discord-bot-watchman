@@ -7,9 +7,9 @@ const { version } = JSON.parse(fs.readFileSync('package.json'));
 const settings = JSON.parse(fs.readFileSync('settings.json'));
 
 const client = new Discord.Client();
-const FakeI18N = require('./classes/fakei18n.js');
 const Security = require('./classes/security.js');
 const Commands = require('./classes/commands.js');
+const Database = require('./classes/database.js');
 const Utils = require('./classes/utils.js');
 
 moment.locale(settings.locale);
@@ -19,6 +19,7 @@ i18n.configure({
     directory: __dirname + '/locales'
 });
 
+const database = new Database(settings.mongodb);
 const botState = {
     startedAt: new Date()
 }
@@ -28,8 +29,10 @@ const Container = {
     prefix: null,
     security: null,
     commandHandler: null,
+    database,
     settings,
     botState,
+    admins: settings.admins,
     moment
 };
 
@@ -38,7 +41,7 @@ function onReady() {
     //prefix = `<@${client.user.id}>`;
     Container.prefix = settings.prefix;
     Container.utils = Utils;    
-    Container.security = new Security(settings.admins);
+    Container.security = new Security(Container);
     Container.commandHandler = new Commands(Container);  
 }
   

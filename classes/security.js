@@ -1,27 +1,42 @@
 class Security {
-    constructor(admins) {
-        this.admins = admins;
-        this.trustedUsers = [];
+    constructor(container) {
+        this.admins = container.admins;
+        this.database = container.database;
     }
 
-    addUsers(users) {
+    updateUsers(server, users, update) {
         if (!Array.isArray(users)) users = [users];
-        this.trustedUsers = this.trustedUsers.concat(users);
+        const bulks = users.map(user => ({
+            updateOne: {
+                filter: { server, user },
+                update: Object.assign({server, user}, update),
+                upsert: true
+            }
+        }));
+        return this.database.User.collection.bulkWrite(bulks);
     }
 
-    delUsers(users) {
-        if (!Array.isArray(users)) users = [users];
-        this.trustedUsers = this.trustedUsers.filter(id => !users.includes(id));
+    async addUsers(server, users) {
+        const result = await this.updateUsers(server, users, {isAdmin: true});
+        console.log(result);
     }
 
-    listUsers() {
-        return [...this.admins, ...this.trustedUsers];
+    async delUsers(server, users) {
+        const result = await this.updateUsers(server, users, {isAdmin: false});
+        console.log(result);
     }
 
-    isTrusted(user) {
+    async listUsers(server) {
+        const users = await this.database.User.find({server, isAdmin: true});
+        const ids = users.map(x => x.user);
+        return [...this.admins, ...ids].filter((el, index, arr) => arr.indexOf(el) === index);
+    }
+
+    async isTrusted(server, user) {
         if (this.admins.includes(user.id)) return true;
-        if (this.trustedUsers.includes(user.id)) return true;
-        return false;
+        const dbUser = await this.database.User.findOne({server, user});
+        if (!dbUser) return false;
+        return dbUser.isAdmin;
     }        
 }
 

@@ -1,6 +1,7 @@
 {
     "locale": "ru",
     "bot_token": "discord_bot_token",
+    "mongodb": "mongodb://localhost:27017/discord_bot_watchman",
     "prefix": "bot_command_prefix",
     "admins": [
         "List", "of", "admins", "user", "ids"
