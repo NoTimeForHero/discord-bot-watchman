@@ -1,3 +1,5 @@
+const { TextChannel } = require('discord.js');
+
 class Commands {
 
     constructor(container) {
@@ -9,8 +11,14 @@ class Commands {
         this.moment = container.moment;
 
         this.methods = {
-            'help': { 'function': this.help },            
-            'uptime': {'function': this.uptime},
+            'help': {
+                'allowed_in_PM': true,
+                'function': this.help
+            },            
+            'uptime': {
+                'allowed_in_PM': true,
+                'function': this.uptime
+            },
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
                 'function': this.trusted
@@ -29,7 +37,12 @@ class Commands {
             ev.reply(this.i18n.__('unknown_command', command));  
             return;
         }
-        this.methods[command].function.apply(this, [ev, ...args]);
+        const objCommand = this.methods[command];        
+        if (!(ev.channel instanceof TextChannel) && !objCommand.allowed_in_PM) {
+            ev.reply(this.i18n.__('command_denied_in_pm', command));
+            return;
+        }
+        objCommand.function.apply(this, [ev, ...args]);
     }
 
     uptime(ev) {
