@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 class Database {    
     constructor(connectionString) {
-        mongoose.connect(connectionString, { useNewUrlParser: true });
+        this.connectionString = connectionString
         const userSchema = new Schema({
             server: String,
             user: String,
@@ -13,6 +13,7 @@ class Database {
             lastVoice: Object
         });
         userSchema.index({server: 1, user: 1}, {unique: true})
+        userSchema.index({server: 1});
         this.User = mongoose.model("User", userSchema);
 
         const serverSchema = new Schema({
@@ -20,9 +21,14 @@ class Database {
                 type: String,
                 index: true
             },
-            isEnabled: Boolean
+            isEnabled: Boolean,
+            watched: Array
         })
         this.Server = mongoose.model("Server", serverSchema);
+    }
+
+    async connect() {
+        await mongoose.connect(this.connectionString, { useNewUrlParser: true });        
     }
 
     bulkUsersEdit(server, users, update) {
@@ -31,7 +37,7 @@ class Database {
             updateOne: {
                 filter: { server, user },
                 update: {
-                    $set: Object.assign({server, user}, update),
+                    $set: update,
                 },
                 upsert: true
             }

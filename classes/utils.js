@@ -1,4 +1,11 @@
 const Utils = {
+
+    findMentionTokens(msg) {
+        const regex = /(?:<@&?(\d+)>|@here|@everyone)/g;
+        let match = msg.match(regex);
+        return match ? [...match] : [];
+    },
+
     findUsersByMessage(ev) {
         const findUsers = ev => {
             const regExMention = /<@(\d+)>/g;

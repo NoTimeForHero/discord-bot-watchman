@@ -1,9 +1,12 @@
 {
 	"user_group_trusted": "администраторов",
 	"user_group_watched": "наблюдаемых",
+	"-----------------": "----------------------",
 	"users_list": "Список пользователей из группы {{groupName}}: %s",
 	"users_added": "Пользователи были добавлены в группу {{groupName}}: %s",
 	"users_removed": "Пользователи были удалены из группы {{groupName}}: %s",
+	"users_cleared": "Группа пользователей-{{groupName}} была очищена!",
+	"------------------": "----------------------",
 	"uptime_message": "Бот запущен %s",
 	"command_description_help": "Отображает все доступные команды",
 	"command_description_uptime": "Показывает сколько времени прошло с запуска бота",
@@ -21,10 +24,12 @@
 	"command_description_server": "Переключение проверки состояния онлайна на этом сервере",
 	"command_description_server_enable": "подключить для этого сервера",
 	"command_description_server_disable": "отключить для этого сервера",
+	"mention_here_forbidden": "Использования упоминания <here> недопустимо!",
 	"server_enabled": "server_enabled",
 	"server_disabled": "server_disabled",
 	"command_description_watched": "command_description_watched",
 	"command_description_watched_add": "command_description_watched_add",
 	"command_description_watched_del": "command_description_watched_del",
-	"command_description_watched_list": "command_description_watched_list"
+	"command_description_watched_list": "command_description_watched_list",
+	"command_description_watched_set": "command_description_watched_set"
 }

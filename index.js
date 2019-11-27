@@ -47,4 +47,8 @@ function onReady() {
   
 client.on('message', ev => Container.commandHandler.onCommand(ev));
 client.on('ready', onReady);
-client.login(settings.bot_token);
+
+(async() => {
+    await database.connect();
+    client.login(settings.bot_token);
+})();

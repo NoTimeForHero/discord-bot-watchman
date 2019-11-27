@@ -35,7 +35,7 @@ class Commands {
                 'function': this.toggleServer
             },
             'watched': {
-                'subcommands': ['add', 'del', 'list'],
+                'subcommands': ['set', 'list'],
                 'function': this.watched
             }
         }
@@ -144,25 +144,31 @@ class Commands {
         const groupName = this.i18n.__('user_group_watched');
 
         switch (action) {
-            case 'add':
-                this.__getUsers(ev, async (ids, names) => {
-                    await this.database.bulkUsersEdit(server, ids, {isWatched: true});                    
-                    ev.reply(this.i18n.__('users_added', names, {groupName}));                        
-                })
-                return;
-            case 'del':
-                this.__getUsers(ev, async (ids, names) => {
-                    await this.database.bulkUsersEdit(server, ids, {isWatched: false});                    
-                    ev.reply(this.i18n.__('users_removed', names, {groupName}));                        
-                });
+            case 'set':
+                {
+                    const watched = this.utils.findMentionTokens(ev.content);
+                    if (watched.includes('@here')) {
+                        ev.reply(this.i18n.__('mention_here_forbidden'));
+                        return;
+                    }
+                    const res = await this.database.Server.updateOne({ server }, { server, watched }, { upsert: true });
+                    console.log(res);
+                    if (watched.length > 0) {
+                        ev.reply(this.i18n.__('users_added', watched, { groupName }));
+                    } else {
+                        ev.reply(this.i18n.__('users_cleared', { groupName }));
+                    }
+                }
                 return;
             case 'list':
-                const users = await this.database.User.find({server, isAdmin: true});
-                const names = users.map(obj => obj.id).map(id => `<@${id}>`).join(', ');
-                ev.reply(this.i18n.__('users_list', names, {groupName}));                        
-                return;
+                {
+                    const res = await this.database.Server.findOne({ server });
+                    const names = res.watched.join(', ');
+                    ev.reply(this.i18n.__('users_list', names, { groupName }));
+                    return;
+                }
             default:
-                ev.reply(this.i18n.__('unknown_subcommand', action));                        
+                ev.reply(this.i18n.__('unknown_subcommand', action));
                 return;
         }
     }
