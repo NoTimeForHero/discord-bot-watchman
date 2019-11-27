@@ -1,4 +1,9 @@
 {
+	"user_group_trusted": "администраторов",
+	"user_group_watched": "наблюдаемых",
+	"users_list": "Список пользователей из группы {{groupName}}: %s",
+	"users_added": "Пользователи были добавлены в группу {{groupName}}: %s",
+	"users_removed": "Пользователи были удалены из группы {{groupName}}: %s",
 	"uptime_message": "Бот запущен %s",
 	"command_description_help": "Отображает все доступные команды",
 	"command_description_uptime": "Показывает сколько времени прошло с запуска бота",
@@ -8,12 +13,18 @@
 	"command_description_trusted_list": "Просмотреть список администраторов",
 	"unknown_subcommand": "Неизвестная под-команда '%s'",
 	"unknown_command": "Неизвестная команда '%s'",
-	"trusted_list": "Список администраторов: %s",
 	"argument_error_no_users": "Ошибка: не перечислены пользователи для выполнения!",
-	"users_added_to_trusted": "Пользователи были добавлены в администраторы: %s",
-	"users_removed_from_trusted": "Пользователи были удалены из администраторов: %s",
 	"unauthorized_user": "Недостаточно прав доступа!",
 	"command_denied_in_pm": "Команда '%s' запрещена в личных сообщениях!",
-    "command_description_refresh": "Немедленно обновить данные по онлайну",
-    "under_construction": "- - - Данный функционал в процессе разработки! - - -"
+	"command_description_refresh": "Немедленно обновить данные по онлайну",
+	"under_construction": "- - - Данный функционал в процессе разработки! - - -",
+	"command_description_server": "Переключение проверки состояния онлайна на этом сервере",
+	"command_description_server_enable": "подключить для этого сервера",
+	"command_description_server_disable": "отключить для этого сервера",
+	"server_enabled": "server_enabled",
+	"server_disabled": "server_disabled",
+	"command_description_watched": "command_description_watched",
+	"command_description_watched_add": "command_description_watched_add",
+	"command_description_watched_del": "command_description_watched_del",
+	"command_description_watched_list": "command_description_watched_list"
 }

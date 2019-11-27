@@ -4,26 +4,12 @@ class Security {
         this.database = container.database;
     }
 
-    updateUsers(server, users, update) {
-        if (!Array.isArray(users)) users = [users];
-        const bulks = users.map(user => ({
-            updateOne: {
-                filter: { server, user },
-                update: Object.assign({server, user}, update),
-                upsert: true
-            }
-        }));
-        return this.database.User.collection.bulkWrite(bulks);
-    }
-
     async addUsers(server, users) {
-        const result = await this.updateUsers(server, users, {isAdmin: true});
-        console.log(result);
+        await this.database.bulkUsersEdit(server, users, {isAdmin: true});
     }
 
     async delUsers(server, users) {
-        const result = await this.updateUsers(server, users, {isAdmin: false});
-        console.log(result);
+        await this.database.bulkUsersEdit(server, users, {isAdmin: false});
     }
 
     async listUsers(server) {
@@ -33,7 +19,7 @@ class Security {
     }
 
     async isTrusted(server, user) {
-        if (this.admins.includes(user.id)) return true;
+        if (this.admins.includes(user)) return true;
         const dbUser = await this.database.User.findOne({server, user});
         if (!dbUser) return false;
         return dbUser.isAdmin;

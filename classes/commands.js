@@ -1,4 +1,5 @@
 const { TextChannel } = require('discord.js');
+const { AccessDenied } = require('./errors.js');
 
 class Commands {
 
@@ -24,15 +25,23 @@ class Commands {
                 ['function'](ev) {
                     ev.reply(this.i18n.__('under_construction'))
                 }
-            },
+            },            
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
                 'function': this.trusted
+            },
+            'server': {
+                'subcommands': ['enable', 'disable'],
+                'function': this.toggleServer
+            },
+            'watched': {
+                'subcommands': ['add', 'del', 'list'],
+                'function': this.watched
             }
         }
     }
 
-    onCommand(ev) {
+    async onCommand(ev) {
         let msg = ev.content;        
         const args = msg.split(/\W/);
         if (args.length < 2) return;
@@ -48,7 +57,33 @@ class Commands {
             ev.reply(this.i18n.__('command_denied_in_pm', command));
             return;
         }
-        objCommand.function.apply(this, [ev, ...args]);
+        try {
+            await objCommand.function.apply(this, [ev, ...args]);
+        } catch (ex) {
+            if (ex instanceof AccessDenied) return;
+            console.warn(`Error occured during running command "${command}":`)
+            console.warn(ex);
+        }
+    }
+
+    async __checkPermissions(ev, subcommand=null, allowedSubcommands = []) {
+        if (allowedSubcommands.includes(subcommand)) return Promise.resolve();
+        const isTrusted = await this.security.isTrusted(ev.channel.guild.id, ev.author.id);
+        if (!isTrusted) {
+            ev.reply(this.i18n.__('unauthorized_user'));
+            return Promise.reject(new AccessDenied());
+        }
+        return Promise.resolve();
+    }
+
+    __getUsers(ev, callback) {
+        const ids = this.utils.findUsersByMessage(ev);
+        if (ids.length < 1) {
+            ev.reply(this.i18n.__('argument_error_no_users'));                        
+            return;
+        }
+        const names = ids.map(x => `<@${x}>`).join(', ');            
+        callback(ids, names);
     }
 
     uptime(ev) {
@@ -57,7 +92,11 @@ class Commands {
     }
 
     help(ev) {
-        const methods = Object.entries(this.methods);        
+        const isAllowedInPm = ([_, options]) => {
+            if (ev.channel instanceof TextChannel) return true;
+            return options.allowed_in_PM;
+        }
+        const methods = Object.entries(this.methods).filter(isAllowedInPm);
         const tabs = ' '.repeat(4);
         let message = methods.reduce((arr, [command, details], i)=>{
             const description = this.i18n.__(`command_description_${command}`);
@@ -73,40 +112,82 @@ class Commands {
         ev.reply(message);
     }
 
-    async trusted(ev, action) {
+    async toggleServer(ev, action) {
         const isTrusted = await this.security.isTrusted(ev.channel.guild.id, ev.author.id);
         if (!isTrusted) {
             ev.reply(this.i18n.__('unauthorized_user'));
             return;            
-        }        
-
-        const withUsers = (ev, callback) => {
-            const ids = this.utils.findUsersByMessage(ev);
-            if (ids.length < 1) {
-                ev.reply(this.i18n.__('argument_error_no_users'));                        
-                return;
-            }
-            const names = ids.map(x => `<@${x}>`).join(', ');            
-            callback(ids, names);
         }
+
+        const server = ev.channel.guild.id;
+        let isEnabled = false;
+
+        switch (action) {
+            case 'enable':
+                isEnabled = true;
+                ev.reply(this.i18n.__('server_enabled'));
+                break;
+            case 'disable':
+                isEnabled = false;
+                ev.reply(this.i18n.__('server_disabled'));
+                break;
+            default:
+                ev.reply(this.i18n.__('unknown_subcommand', action));                        
+                return;
+        }
+        await this.database.Server.update({server}, {server, isEnabled}, {upsert: true});
+    }
+
+    async watched(ev, action) {
+        await this.__checkPermissions(ev, action, ['list']);
+        const server = ev.channel.guild.id;
+        const groupName = this.i18n.__('user_group_watched');
 
         switch (action) {
             case 'add':
-                withUsers(ev, (ids, names) => {
-                    this.security.addUsers(ev.channel.guild.id, ids);            
-                    ev.reply(this.i18n.__('users_added_to_trusted', names));                        
+                this.__getUsers(ev, async (ids, names) => {
+                    await this.database.bulkUsersEdit(server, ids, {isWatched: true});                    
+                    ev.reply(this.i18n.__('users_added', names, {groupName}));                        
                 })
                 return;
             case 'del':
-                withUsers(ev, (ids, names) => {
+                this.__getUsers(ev, async (ids, names) => {
+                    await this.database.bulkUsersEdit(server, ids, {isWatched: false});                    
+                    ev.reply(this.i18n.__('users_removed', names, {groupName}));                        
+                });
+                return;
+            case 'list':
+                const users = await this.database.User.find({server, isAdmin: true});
+                const names = users.map(obj => obj.id).map(id => `<@${id}>`).join(', ');
+                ev.reply(this.i18n.__('users_list', names, {groupName}));                        
+                return;
+            default:
+                ev.reply(this.i18n.__('unknown_subcommand', action));                        
+                return;
+        }
+    }
+
+    async trusted(ev, action) {
+        await this.__checkPermissions(ev, action, ['list']);
+        const groupName = this.i18n.__('user_group_trusted');
+
+        switch (action) {
+            case 'add':
+                this.__getUsers(ev, (ids, names) => {
+                    this.security.addUsers(ev.channel.guild.id, ids);            
+                    ev.reply(this.i18n.__('users_added', names, {groupName}));                        
+                })
+                return;
+            case 'del':
+                this.__getUsers(ev, (ids, names) => {
                     this.security.delUsers(ev.channel.guild.id, ids);
-                    ev.reply(this.i18n.__('users_removed_from_trusted', names));                        
+                    ev.reply(this.i18n.__('users_removed', names, {groupName}));                        
                 });
                 return;
             case 'list':
                 let list = await this.security.listUsers(ev.channel.guild.id);
-                list = list.map(id => `<@${id}>`).join(', ');
-                ev.reply(this.i18n.__('trusted_list', list));                        
+                const names = list.map(id => `<@${id}>`).join(', ');
+                ev.reply(this.i18n.__('users_list', names, {groupName}));                        
                 return;
             default:
                 ev.reply(this.i18n.__('unknown_subcommand', action));                        
