@@ -25,7 +25,10 @@ class Commands {
                 ['function'](ev) {
                     ev.reply(this.i18n.__('under_construction'))
                 }
-            },            
+            },
+            'dashboard': {
+                'function': this.dashboard
+            },
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
                 'function': this.trusted
@@ -112,13 +115,16 @@ class Commands {
         ev.reply(message);
     }
 
-    async toggleServer(ev, action) {
-        const isTrusted = await this.security.isTrusted(ev.channel.guild.id, ev.author.id);
-        if (!isTrusted) {
-            ev.reply(this.i18n.__('unauthorized_user'));
-            return;            
-        }
+    async dashboard(ev) {
+        await this.__checkPermissions(ev);
+        const channel = ev.channel;
+        const server = ev.channel.guild.id;
+        await this.database.Server.update({server}, {server, dashboardChannel: channel.id}, {upsert: true});
+        ev.reply(this.i18n.__('dashboard_has_been_set', channel.name));
+    }
 
+    async toggleServer(ev, action) {
+        await this.__checkPermissions(ev);
         const server = ev.channel.guild.id;
         let isEnabled = false;
 
@@ -199,15 +205,6 @@ class Commands {
                 ev.reply(this.i18n.__('unknown_subcommand', action));                        
                 return;
         }
-    }
-
-    setChannel(ev) {                    
-        if (!this.security.isTrusted(ev.author)) {
-            ev.reply(this.i18n.__('unauthorized_user'));
-            return;            
-        }        
-
-        ev.reply(this.i18n.__('notification_channel_set'));
     }
 }
 

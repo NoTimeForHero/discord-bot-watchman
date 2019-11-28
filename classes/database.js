@@ -22,6 +22,8 @@ class Database {
                 index: true
             },
             isEnabled: Boolean,
+            dashboardChannel: String,
+            dashboardMessages: Array,
             watched: Array
         })
         this.Server = mongoose.model("Server", serverSchema);

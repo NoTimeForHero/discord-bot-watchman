@@ -25,11 +25,11 @@
 	"command_description_server_enable": "подключить для этого сервера",
 	"command_description_server_disable": "отключить для этого сервера",
 	"mention_here_forbidden": "Использования упоминания <here> недопустимо!",
-	"server_enabled": "server_enabled",
-	"server_disabled": "server_disabled",
-	"command_description_watched": "command_description_watched",
-	"command_description_watched_add": "command_description_watched_add",
-	"command_description_watched_del": "command_description_watched_del",
-	"command_description_watched_list": "command_description_watched_list",
-	"command_description_watched_set": "command_description_watched_set"
+	"dashboard_has_been_set": "Для вывода информации был установлен канал '%s'.",
+	"server_enabled": "Сервер был подключен",
+	"server_disabled": "Сервер был отключен",
+	"command_description_watched": "Управление списком наблюдаемых пользователей",
+	"command_description_watched_list": "Посмотреть список наблюдаемых пользователей",
+	"command_description_watched_set": "Установить список наблюдаемых пользователей",
+	"command_description_dashboard": "Выводить на текущем канале информацию от бота"
 }
