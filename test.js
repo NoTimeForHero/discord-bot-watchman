@@ -7,7 +7,7 @@ const Utils = require('./classes/utils.js');
 const Server = require('./classes/webserver.js');
 
 
-const server = new Server();
+const server = new Server(null, settings);
 server.start();
 
 /*

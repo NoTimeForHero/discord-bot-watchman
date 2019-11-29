@@ -1,6 +1,14 @@
 {
+    "mode": "development",    
     "locale": "ru",
-    "bot_token": "discord_bot_token",
+    "discord": {
+        "client_id": "218888502002188289",
+        "bot_token": "MjE4ODg4NTAyMDAyMTg4Mjg5.XdXZmg.jKCIi751mzFUJT6dOhca0bpzT-4"
+    },
+    "webserver": {
+        "port": 5000,
+        "static": "web"
+    },
     "mongodb": "mongodb://localhost:27017/discord_bot_watchman",
     "prefix": "bot_command_prefix",
     "admins": [

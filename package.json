@@ -11,7 +11,9 @@
   "author": "NoTimeForHero",
   "license": "Apache License 2.0",
   "dependencies": {
+    "cors": "^2.8.5",
     "discord.js": "^11.5.1",
+    "express": "^4.17.1",
     "form-data": "^3.0.0",
     "i18n": "^0.8.4",
     "moment": "^2.24.0",
