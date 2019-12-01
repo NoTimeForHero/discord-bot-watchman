@@ -24,11 +24,23 @@ class WebServer {
         const staticDir = this.settings.webserver.static || 'public';
         console.log(`Directory with static files: ${staticDir}`);
 
+        app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), staticDir, 'index.html')));
+        app.get('/settings.json', this.getSettings.bind(this));
         app.use(express.static(staticDir));        
-        app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
         
         const port = this.settings.webserver.port || 3000
         app.listen(port, () => console.log(`Express.JS listening on port ${port}!`));    
+        this.app = app;
+    }
+
+    getSettings(_, res) {
+        // Только публичнуя часть свойств отдаем клиенту
+        const { client_id, redirect } = this.settings.discord;
+
+        const data = {
+            bot: { client_id, redirect }
+        }
+        res.send(data);
     }
 
     async stop() {

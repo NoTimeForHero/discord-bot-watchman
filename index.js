@@ -50,5 +50,5 @@ client.on('ready', onReady);
 
 (async() => {
     await database.connect();
-    client.login(settings.bot_token);
+    client.login(settings.discord.bot_token);
 })();

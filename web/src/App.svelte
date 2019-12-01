@@ -1,7 +1,31 @@
 <script>
+	import { onMount } from 'svelte';
 	import { Router, Link, Route } from "svelte-routing";
-	const discordLink = 'https://discordapp.com/api/oauth2/authorize?client_id=xxxxxxxxxxxxxxxxx&redirect_uri=http%3A%2F%2Flocalhost%3A5000&response_type=token&scope=identify';
+
+	import Auth from './Auth.svelte';
+	import Online from './Online.svelte';
+
 	let url;
+	let isReady = false;
+	let discordLink = 'kek';
+	let settings = null;	
+
+	function getDiscordLink(settings) {
+		let params = {
+			client_id: settings.bot.client_id,
+			redirect_uri: settings.bot.redirect,
+			response_type: 'token',
+			scope: 'identify'
+		};
+		params = Object.entries(params).map( ([key,value]) => `${key}=${value}`).join('&');
+		return 'https://discordapp.com/api/oauth2/authorize?' + params;
+	}
+
+	onMount(async()=> {		
+		settings = await fetch(window.urlAPI + 'settings.json').then(x => x.json());
+		isReady = true;
+	});
+
 </script>
 
 <!--
@@ -22,12 +46,18 @@
 <div class="container">
 	<div class="row">
 		<div class="col-lg-12 text-center">
-			<h1 class="mt-5">Требуется авторизация</h1>
-			<p class="lead">Только участники сервера могут просматривать информацию о нём</p>	
-			<a class="btn btn-primary btn-large" href="{discordLink}">
-				<i class="fab fa-discord"></i>			
-				Войти через Discord
-			</a>
+			{#if !isReady}
+				<div class="mt-5 mb-3">
+					<h3>Загрузка приложения</h3>
+				</div>
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped progress-bar-animated"
+						role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+				</div>
+			{:else}
+				<!--<Auth settings="{settings}"/>-->
+				<Online settings="{settings}" />
+			{/if}
 		</div>
 	</div>
 </div>
