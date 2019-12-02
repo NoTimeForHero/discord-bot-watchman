@@ -8,9 +8,7 @@ class Database {
             server: String,
             user: String,
             isAdmin: Boolean,
-            isWatched: Boolean,
-            lastOnline: Date,
-            lastVoice: Object
+            isWatched: Boolean
         });
         userSchema.index({server: 1, user: 1}, {unique: true})
         userSchema.index({server: 1});
@@ -27,6 +25,18 @@ class Database {
             watched: Array
         })
         this.Server = mongoose.model("Server", serverSchema);
+
+        const onlineSchema = new Schema({
+            server: String,
+            user: String,
+            lastOnline: Date,
+            lastVoice: Date,
+            days: Object,
+            weeks: Object
+        })
+        onlineSchema.index({server: 1, user: 1}, {unique: true});
+        onlineSchema.index({server: 1});
+        this.Online = mongoose.model("Online", onlineSchema);
     }
 
     async connect() {

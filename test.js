@@ -2,62 +2,57 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const settings = JSON.parse(fs.readFileSync('settings.json'));
+const moment = require('moment');
 
+const Database = require('./classes/database.js');
 const Utils = require('./classes/utils.js');
 const Server = require('./classes/webserver.js');
+const Online = require('./classes/online.js');
 
+const database = new Database(settings.mongodb);
+const Container = {
+    database,
+    settings,
+    moment
+};
 
+/*
 let getUsers;
-
 const server = new Server(null, settings);
 server.start();
-
 const app = server.app;
 app.get('/online.json', (_, res) => res.send(getUsers()));
+*/
 
-function onReady() {
+async function onReady() {
     console.log(`Logged in as ${client.user.tag} (${client.user.id})!`);
+    //console.log('Attached guilds: ' + guilds.map(x => `"${x.name}"`).join(', '));
+    //console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
 
     const guilds = [...client.guilds.values()];
     console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
-    //console.log('Attached guilds: ' + guilds.map(x => `"${x.name}"`).join(', '));
-
-    //console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
+ 
     const server = client.guilds.get(settings.debug.server);
     console.log('Getting server: ' + server.name);
 
+    await database.connect();
 
-    getUsers = () => {
+    const online = new Online(Container);
+    online.update(server, 60);
+
+    getData = () => {
         const getRoles = (roles) => [...roles.values()].map(({id, name, hexColor}) => ({id, name, hexColor}));
-        let users = [...server.members.values()];
-        users = users.reduce((arr, el)=>{
-            arr.push({
+        let users = [...server.members.values()].map(el=>{
+            return {
                 name: el.displayName,
+                joinedAt: el.joinedAt,
                 avatar: el.user.displayAvatarURL,
                 color: el.displayHexColor,
-                /*
-                online: el.presence.status !== 'offline',
-                voice: el.voiceChannel ? el.voiceChannel.name : undefined,
-                */
-                online: new Date(),
-                voice: {
-                    name: 'AFK',
-                    date: new Date()
-                },           
-                roles: getRoles(el.roles)
-            });
-            return arr;
-        }, []);
-
-        return {
-            server: {
-                name: server.name
-            },
-            users
-        };
+                 roles: getRoles(el.roles)
+            };
+        });
+        return { server: { name: server.name }, users };
     }
-    //data.forEach(x => console.log(x.name, x.roles));
-    //console.log(server);
 }
   
 client.on('message', ev => {    

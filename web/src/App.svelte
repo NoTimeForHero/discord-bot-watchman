@@ -45,7 +45,7 @@
 <!-- Page Content -->
 <div class="container">
 	<div class="row">
-		<div class="col-lg-12 text-center">
+		<div class="col-lg-12">
 			{#if !isReady}
 				<div class="mt-5 mb-3">
 					<h3>Загрузка приложения</h3>
@@ -55,7 +55,7 @@
 						role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
 				</div>
 			{:else}
-				<!--<Auth settings="{settings}"/>-->
+				<!--<Auth class="text-center" settings="{settings}"/>-->
 				<Online settings="{settings}" />
 			{/if}
 		</div>

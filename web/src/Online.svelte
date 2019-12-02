@@ -40,6 +40,21 @@
     padding: 6px 5px;    
     height: 22px;
 }
+.user {
+    margin-bottom: 5px;
+}
+
+.user .name {
+    font-weight: bold;
+    text-shadow: 1px 1px 0px black;
+}
+
+.user img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50px;
+    margin-right: 5px;
+}
 </style>
 
 <div class="mt-5">
@@ -60,15 +75,18 @@
             <tr>
                 <th>Пользователь</th>
                 <th>Роли</th>
-                <th>Дата присоединения</th>
-                <th>Последний онлайн</th>
+                <th>Онлайн</th>
+                <th>Голосовой чат</th>
             </tr>
         </thead>
         {#each getFilteredUsers(users) as user}
         <tr>    
             <td style='width: 200px'>
-                <img style='width: 32px; height: 32px' src='{user.avatar}' alt='{user.name} avatar'/>
-                {user.name}
+                <div class="user">
+                    <img style='' src='{user.avatar}' alt='{user.name} avatar'/>
+                    <span class='name' style="color: {user.color || 'white'}">{user.name}</span>
+                </div>
+                {moment(user.joinedAt).format('DD MMMM YYYY')}
             </td>
             <td>
                 {#each user.roles as role}
@@ -78,11 +96,38 @@
                 {/if}
                 {/each}                
             </td>
-            <td>Неизвестно</td>
             <td>
-                <p>{moment(user.online).fromNow()}</p>
-                <p>{moment(user.voice.date).fromNow()} на канале "{user.voice.name}"</p>
+                <table>
+                    <tr>
+                        <td>Сегодня</td>
+                        <th>5 минут</th>
+                    </tr>
+                    <tr>
+                        <td>Неделя</td>
+                        <th>5 минут</th>
+                    </tr>
+                    <tr>
+                        <td>Был в сети</td>
+                        <th>5 минут назад</th>
+                    </tr>
+                </table>
             </td>
+            <td>
+                <table>
+                    <tr>
+                        <td>Сегодня</td>
+                        <th>5 минут</th>
+                    </tr>
+                    <tr>
+                        <td>Неделя</td>
+                        <th>5 минут</th>
+                    </tr>
+                    <tr>
+                        <td>Был в сети</td>
+                        <th>5 минут назад</th>
+                    </tr>
+                </table>
+            </td>            
         </tr>
         {/each}
     </table>
