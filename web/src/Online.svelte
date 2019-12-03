@@ -6,8 +6,9 @@
   moment.locale("ru");
 
   import humanizeDuration from 'humanize-duration';
-  
   const humanizer = humanizeDuration.humanizer({ language: 'ru', round: true, delimiter: ' '})
+
+  import lodash from "lodash";
 
   let server = null;
   let users = null;
@@ -16,10 +17,11 @@
   let filters = {
     role: null
   };
+  let sortBy = null;
 
   $: getFilteredUsers = users => {
     if (!users) return [];
-    return users.reduce((arr, user) => {
+    const data = users.reduce((arr, user) => {
       if (filters.role) {
         const ids = user.roles.map(x => x.id);
         if (!ids.includes(filters.role.id)) return arr;
@@ -27,6 +29,8 @@
       arr.push(user);
       return arr;
     }, []);
+    if (sortBy) return lodash.sortBy(data, sortBy);
+    return data;
   };
 
   onMount(async () => {
@@ -61,6 +65,10 @@
 
   table.noborder td, table.noborder th {
       border:none;
+  }
+
+  .fa-sort {
+    color: darkorange;
   }
 </style>
 
@@ -101,7 +109,10 @@
                 {user.name}
               </span>
             </div>
-            {moment(user.joinedAt).format('DD MMMM YYYY')}
+            <span on:click={() => sortBy = 'joinedAt'}>
+              <i class="fa fa-sort" aria-hidden="true"></i>
+              {moment(user.joinedAt).format('DD MMMM YYYY')}
+            </span>
           </td>
           <td>
             {#each user.roles as role}
@@ -120,15 +131,24 @@
             <table class="noborder">
               {#if user.online}     
               <tr>
-                <td>Сегодня</td>
+                <td on:click={() => sortBy = 'online.day'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
+                  Сегодня
+                </td>
                 <th>{user.online.day ? humanizer(user.online.day*1000) : 'неизвестно'}</th>
               </tr>
               <tr>
-                <td>Неделя</td>
+                <td on:click={() => sortBy = 'online.week'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                
+                  Неделя
+                </td>
                 <th>{user.online.week ? humanizer(user.online.week*1000) : 'неизвестно'}</th>
               </tr>
               <tr>
-                <td>Был в сети</td>
+                <td on:click={() => sortBy = 'online.last'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                   
+                  Был в сети
+                </td>
                 <th>{user.online.last ? moment(user.online.last).fromNow() : 'неизвестно'}</th>
               </tr>
             {:else}           
@@ -142,15 +162,24 @@
             <table class="noborder">
               {#if user.voice}            
               <tr>
-                <td>Сегодня</td>
+                <td on:click={() => sortBy = 'voice.day'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
+                  Сегодня
+                </td>
                 <th>{user.voice.day ? humanizer(user.voice.day*1000) : 'неизвестно'}</th>
               </tr>
               <tr>
-                <td>Неделя</td>
+                <td on:click={() => sortBy = 'voice.week'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
+                  Неделя
+                </td>
                 <th>{user.voice.week ? humanizer(user.voice.week*1000) : 'неизвестно'}</th>
               </tr>
               <tr>
-                <td>Был в сети</td>
+                <td on:click={() => sortBy = 'voice.last'}>
+                  <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                   
+                  Был в сети
+                </td>
                 <th>{user.voice.last ? moment(user.voice.last).fromNow() : 'неизвестно'}</th>
               </tr>
                 {:else}           
