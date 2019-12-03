@@ -59,7 +59,7 @@ async function onReady() {
         });
         console.log(`Updating online is finished!`);
     };
-    setTimeout(updateOnline, 60 * 1000);
+    setInterval(updateOnline, 60 * 1000);
     updateOnline();
 
 }

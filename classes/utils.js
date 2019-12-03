@@ -4,6 +4,7 @@ const Utils = {
         const getRoles = (roles) => [...roles.values()].map(({id, name, hexColor}) => ({id, name, hexColor}));
         let users = [...server.members.values()].map(el=>{
             return {
+                id: el.id,
                 name: el.displayName,
                 joinedAt: el.joinedAt,
                 avatar: el.user.displayAvatarURL,

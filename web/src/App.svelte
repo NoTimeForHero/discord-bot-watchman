@@ -58,7 +58,7 @@
 				<!--<Auth class="text-center" settings="{settings}"/>-->
 				<Router url="{url}">
 					<Route path="online/:id" let:params>
-						<Online settings="{settings}" serverID="{params.id}"/>
+						<Online serverID="{params.id}"/>
 					</Route>
 				</Router>
 			{/if}
@@ -67,7 +67,4 @@
 </div>
 
 <style>
-.btn .fab {
-	margin-right: 5px;
-}
 </style>

@@ -16,8 +16,11 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "humanize-duration": "^3.21.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
+    "polka": "^0.5.2",
     "sirv-cli": "^0.4.4",
     "svelte-routing": "^1.4.0"
   }
