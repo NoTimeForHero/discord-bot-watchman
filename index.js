@@ -21,7 +21,7 @@ i18n.configure({
     directory: __dirname + '/locales'
 });
 
-const database = new Database(settings.mongodb);
+const database = new Database(settings.nedb);
 const botState = {
     startedAt: new Date()
 }
@@ -46,9 +46,10 @@ async function onReady() {
     Container.utils = Utils;    
     Container.security = new Security(Container);
     Container.commandHandler = new Commands(Container);  
+
+    /*
     Container.online = new Online(Container);
     Container.webserver = new WebServer(Container, settings);
-
     Container.webserver.start();
 
     const updateOnline = async() =>{
@@ -61,7 +62,7 @@ async function onReady() {
     };
     setInterval(updateOnline, 60 * 1000);
     updateOnline();
-
+    */
 }
   
 client.on('message', ev => Container.commandHandler.onCommand(ev));

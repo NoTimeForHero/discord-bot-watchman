@@ -15,7 +15,7 @@ class Security {
     async listUsers(server) {
         const users = await this.database.User.find({server, isAdmin: true});
         const ids = users.map(x => x.user);
-        return [...this.admins, ...ids].filter((el, index, arr) => arr.indexOf(el) === index);
+        return ids.filter((el, index, arr) => arr.indexOf(el) === index);
     }
 
     async isTrusted(server, user) {

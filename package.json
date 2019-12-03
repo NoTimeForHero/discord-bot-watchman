@@ -18,6 +18,8 @@
     "i18n": "^0.8.4",
     "moment": "^2.24.0",
     "mongoose": "^5.7.12",
+    "nedb": "^1.8.0",
+    "nedb-async-await": "^0.1.2",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {

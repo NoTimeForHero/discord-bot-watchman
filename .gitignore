@@ -1,6 +1,9 @@
 # ---- Main configuration file ----
 /settings.json
 
+# Database files
+database/*.db
+
 # Logs
 logs
 *.log

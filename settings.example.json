@@ -10,6 +10,7 @@
         "static": "web"
     },
     "mongodb": "mongodb://localhost:27017/discord_bot_watchman",
+    "nedb": "database/",
     "prefix": "bot_command_prefix",
     "admins": [
         "List", "of", "admins", "user", "ids"

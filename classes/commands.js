@@ -28,9 +28,6 @@ class Commands {
                 }
             },
             */
-            'dashboard': {
-                'function': this.dashboard
-            },
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
                 'function': this.trusted
@@ -113,14 +110,6 @@ class Commands {
         ev.reply(message);
     }
 
-    async dashboard(ev) {
-        await this.__checkPermissions(ev);
-        const channel = ev.channel;
-        const server = ev.channel.guild.id;
-        await this.database.Server.update({server}, {server, dashboardChannel: channel.id}, {upsert: true});
-        ev.reply(this.i18n.__('dashboard_has_been_set', channel.name));
-    }
-
     async toggleServer(ev, action) {
         await this.__checkPermissions(ev);
         const server = ev.channel.guild.id;
@@ -139,7 +128,7 @@ class Commands {
                 ev.reply(this.i18n.__('unknown_subcommand', action));                        
                 return;
         }
-        await this.database.Server.updateOne({server}, {server, isEnabled}, {upsert: true});
+        await this.database.setServer(server, isEnabled);
     }
 
     async trusted(ev, action) {
