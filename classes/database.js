@@ -61,7 +61,7 @@ class Database {
             ['voice', 'online'].forEach(prop => {
                 if (!user[prop]) return;
                 const prefix = `${server_id}.${user.id}.${prop}`;                
-                multi = multi.set(`${prefix}.last`, new Date());
+                multi = multi.set(`${prefix}.last`, moment().toISOString());
                 multi = multi.incrby(`${prefix}.year_${year}.week_${weekNo}`, addedTime);
                 multi = multi.incrby(`${prefix}.year_${year}.day_${dayNo}`, addedTime);
             });

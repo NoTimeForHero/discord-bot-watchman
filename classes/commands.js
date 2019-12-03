@@ -27,11 +27,11 @@ class Commands {
                     ev.reply(this.i18n.__('under_construction'))
                 }
             },
-            */
             'trusted': {
                 'subcommands': ['add', 'del', 'list'],
                 'function': this.trusted
             },
+            */            
             'server': {
                 'subcommands': ['enable', 'disable'],
                 'function': this.toggleServer

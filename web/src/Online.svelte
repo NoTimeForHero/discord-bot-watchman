@@ -30,14 +30,8 @@
   };
 
   onMount(async () => {
-    const getData = fetch(window.urlAPI + "server/" + serverID).then(x => x.json());
-    const getOnline = fetch(window.urlAPI + "online/" + serverID).then(x => x.json());
-
-    const [data, online] = await Promise.all([getData, getOnline]);
-
-    console.log(online);
-
-    users = data.users.map(user => Object.assign(user, online[user.id]));
+    const data = await fetch(window.urlAPI + "server/" + serverID).then(x => x.json());
+    users = data.users;
     server = data.server;
   });
 </script>

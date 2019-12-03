@@ -29,7 +29,6 @@ class WebServer {
 
         app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), staticDir, 'index.html')));
         app.get('/settings.json', this.getSettings.bind(this));
-        app.get('/online/:server', this.getOnline.bind(this))
         app.get('/server/:server', this.getServer.bind(this))
         app.use(express.static(staticDir));        
                 
@@ -38,7 +37,7 @@ class WebServer {
         this.app = app;
     }
 
-    async getOnline(req, res) {
+    async getServer(req, res) {
         const serverID = req.params.server;    
         const server = this.discord.guilds.get(serverID);
         if (!server) {
@@ -46,19 +45,11 @@ class WebServer {
             res.send({error: `Discord server with id '${serverID}' not found!`});
             return;
         }
-        const online = await this.online.get(server);
-        res.send(online);  
-    }
 
-    getServer(req, res) {
-        const serverID = req.params.server;    
-        const server = this.discord.guilds.get(serverID);
-        if (!server) {
-            res.status(500);
-            res.send({error: `Discord server with id '${serverID}' not found!`});
-            return;
-        }
-        res.send(this.utils.getServerInfo(server));
+        const online = await this.online.get(server);        
+        const info = await this.utils.getServerInfo(server);
+        info.users = info.users.map(user => Object.assign(user, online[user.id]));
+        res.send(info);
     }
 
     getSettings(_, res) {
