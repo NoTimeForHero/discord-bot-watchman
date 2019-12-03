@@ -56,7 +56,11 @@
 				</div>
 			{:else}
 				<!--<Auth class="text-center" settings="{settings}"/>-->
-				<Online settings="{settings}" />
+				<Router url="{url}">
+					<Route path="online/:id" let:params>
+						<Online settings="{settings}" serverID="{params.id}"/>
+					</Route>
+				</Router>
 			{/if}
 		</div>
 	</div>

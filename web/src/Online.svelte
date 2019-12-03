@@ -1,4 +1,5 @@
 <script>
+    export let serverID;
 	import { onMount } from 'svelte';
     import moment from 'moment';
     import 'moment/locale/ru';
@@ -25,7 +26,7 @@
     }
 
         onMount(async()=>{
-        const data = await fetch(window.urlAPI + 'online.json').then(x => x.json());
+        const data = await fetch(window.urlAPI + 'server/' + serverID).then(x => x.json());
         users = data.users;
         server = data.server;
 

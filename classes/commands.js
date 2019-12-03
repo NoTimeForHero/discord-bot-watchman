@@ -21,11 +21,13 @@ class Commands {
                 'allowed_in_PM': true,
                 'function': this.uptime
             },
+            /*
             'refresh': {
                 ['function'](ev) {
                     ev.reply(this.i18n.__('under_construction'))
                 }
             },
+            */
             'dashboard': {
                 'function': this.dashboard
             },
@@ -36,10 +38,6 @@ class Commands {
             'server': {
                 'subcommands': ['enable', 'disable'],
                 'function': this.toggleServer
-            },
-            'watched': {
-                'subcommands': ['set', 'list'],
-                'function': this.watched
             }
         }
     }
@@ -141,42 +139,7 @@ class Commands {
                 ev.reply(this.i18n.__('unknown_subcommand', action));                        
                 return;
         }
-        await this.database.Server.update({server}, {server, isEnabled}, {upsert: true});
-    }
-
-    async watched(ev, action) {
-        await this.__checkPermissions(ev, action, ['list']);
-        const server = ev.channel.guild.id;
-        const groupName = this.i18n.__('user_group_watched');
-
-        switch (action) {
-            case 'set':
-                {
-                    const watched = this.utils.findMentionTokens(ev.content);
-                    if (watched.includes('@here')) {
-                        ev.reply(this.i18n.__('mention_here_forbidden'));
-                        return;
-                    }
-                    const res = await this.database.Server.updateOne({ server }, { server, watched }, { upsert: true });
-                    console.log(res);
-                    if (watched.length > 0) {
-                        ev.reply(this.i18n.__('users_added', watched, { groupName }));
-                    } else {
-                        ev.reply(this.i18n.__('users_cleared', { groupName }));
-                    }
-                }
-                return;
-            case 'list':
-                {
-                    const res = await this.database.Server.findOne({ server });
-                    const names = res.watched.join(', ');
-                    ev.reply(this.i18n.__('users_list', names, { groupName }));
-                    return;
-                }
-            default:
-                ev.reply(this.i18n.__('unknown_subcommand', action));
-                return;
-        }
+        await this.database.Server.updateOne({server}, {server, isEnabled}, {upsert: true});
     }
 
     async trusted(ev, action) {

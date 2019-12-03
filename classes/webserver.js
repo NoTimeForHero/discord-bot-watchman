@@ -11,6 +11,9 @@ class WebServer {
 
     constructor(container, settings) {
         this.container = container;
+        this.discord = container.discord;
+        this.utils = container.utils;
+        this.online = container.online;
         this.settings = settings;
         this.isDebug = settings.mode !== 'production';
     }
@@ -26,15 +29,39 @@ class WebServer {
 
         app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), staticDir, 'index.html')));
         app.get('/settings.json', this.getSettings.bind(this));
+        app.get('/online/:server', this.getOnline.bind(this))
+        app.get('/server/:server', this.getServer.bind(this))
         app.use(express.static(staticDir));        
-        
+                
         const port = this.settings.webserver.port || 3000
         app.listen(port, () => console.log(`Express.JS listening on port ${port}!`));    
         this.app = app;
     }
 
+    async getOnline(req, res) {
+        const serverID = req.params.server;    
+        const server = this.discord.guilds.get(serverID);
+        if (!server) {
+            res.status(500);
+            res.send({error: `Discord server with id '${serverID}' not found!`});
+            return;
+        }
+        res.send(await this.online.get(server));  
+    }
+
+    getServer(req, res) {
+        const serverID = req.params.server;    
+        const server = this.discord.guilds.get(serverID);
+        if (!server) {
+            res.status(500);
+            res.send({error: `Discord server with id '${serverID}' not found!`});
+            return;
+        }
+        res.send(this.utils.getServerInfo(server));
+    }
+
     getSettings(_, res) {
-        // Только публичнуя часть свойств отдаем клиенту
+        // Только публичную часть свойств отдаем клиенту
         const { client_id, redirect } = this.settings.discord;
 
         const data = {

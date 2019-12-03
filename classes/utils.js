@@ -1,5 +1,30 @@
 const Utils = {
 
+    getServerInfo(server) {
+        const getRoles = (roles) => [...roles.values()].map(({id, name, hexColor}) => ({id, name, hexColor}));
+        let users = [...server.members.values()].map(el=>{
+            return {
+                name: el.displayName,
+                joinedAt: el.joinedAt,
+                avatar: el.user.displayAvatarURL,
+                color: el.displayHexColor,
+                roles: getRoles(el.roles)
+            };
+        });
+        return {
+            server: {
+                name: server.name,
+                roles: getRoles(server.roles)
+            },
+            users
+        };        
+    },
+
+    async getEnabledServers(database, client) {
+        const serverIds = await database.Server.find({isEnabled: true}).then(srv => srv.map(item => item.server));
+        return serverIds.map(id => client.guilds.get(id)).filter(x => !!x).reduce((arr, el)=> {arr[el.id] = el; return arr;}, {});
+    },
+
     findMentionTokens(msg) {
         const regex = /(?:<@&?(\d+)>|@here|@everyone)/g;
         let match = msg.match(regex);

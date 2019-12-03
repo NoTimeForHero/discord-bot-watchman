@@ -7,8 +7,7 @@ class Database {
         const userSchema = new Schema({
             server: String,
             user: String,
-            isAdmin: Boolean,
-            isWatched: Boolean
+            isAdmin: Boolean
         });
         userSchema.index({server: 1, user: 1}, {unique: true})
         userSchema.index({server: 1});
@@ -19,10 +18,7 @@ class Database {
                 type: String,
                 index: true
             },
-            isEnabled: Boolean,
-            dashboardChannel: String,
-            dashboardMessages: Array,
-            watched: Array
+            isEnabled: Boolean
         })
         this.Server = mongoose.model("Server", serverSchema);
 

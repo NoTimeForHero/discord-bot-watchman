@@ -6,7 +6,7 @@ const moment = require('moment');
 
 const Database = require('./classes/database.js');
 const Utils = require('./classes/utils.js');
-const Server = require('./classes/webserver.js');
+const WebServer = require('./classes/webserver.js');
 const Online = require('./classes/online.js');
 
 const database = new Database(settings.mongodb);
@@ -17,11 +17,6 @@ const Container = {
 };
 
 /*
-let getUsers;
-const server = new Server(null, settings);
-server.start();
-const app = server.app;
-app.get('/online.json', (_, res) => res.send(getUsers()));
 */
 
 async function onReady() {
@@ -32,27 +27,7 @@ async function onReady() {
     const guilds = [...client.guilds.values()];
     console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
  
-    const server = client.guilds.get(settings.debug.server);
-    console.log('Getting server: ' + server.name);
-
     await database.connect();
-
-    const online = new Online(Container);
-    online.update(server, 60);
-
-    getData = () => {
-        const getRoles = (roles) => [...roles.values()].map(({id, name, hexColor}) => ({id, name, hexColor}));
-        let users = [...server.members.values()].map(el=>{
-            return {
-                name: el.displayName,
-                joinedAt: el.joinedAt,
-                avatar: el.user.displayAvatarURL,
-                color: el.displayHexColor,
-                 roles: getRoles(el.roles)
-            };
-        });
-        return { server: { name: server.name }, users };
-    }
 }
   
 client.on('message', ev => {    

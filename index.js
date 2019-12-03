@@ -11,6 +11,8 @@ const Security = require('./classes/security.js');
 const Commands = require('./classes/commands.js');
 const Database = require('./classes/database.js');
 const Utils = require('./classes/utils.js');
+const WebServer = require('./classes/webserver.js');
+const Online = require('./classes/online.js');
 
 moment.locale(settings.locale);
 i18n.configure({ 
@@ -36,13 +38,30 @@ const Container = {
     moment
 };
 
-function onReady() {
+async function onReady() {
     console.log(`Logged in as ${client.user.tag} (${client.user.id})!`);
     //prefix = `<@${client.user.id}>`;
+    Container.discord = client;    
     Container.prefix = settings.prefix;
     Container.utils = Utils;    
     Container.security = new Security(Container);
     Container.commandHandler = new Commands(Container);  
+    Container.online = new Online(Container);
+    Container.webserver = new WebServer(Container, settings);
+
+    Container.webserver.start();
+
+    const updateOnline = async() =>{
+        const servers = await Utils.getEnabledServers(database, client);
+        Object.values(servers).forEach(server => {
+            console.log(`Updating online of server: ${server.name}`);
+            Container.online.update(server, 60);
+        });
+        console.log(`Updating online is finished!`);
+    };
+    setTimeout(updateOnline, 60 * 1000);
+    updateOnline();
+
 }
   
 client.on('message', ev => Container.commandHandler.onCommand(ev));
