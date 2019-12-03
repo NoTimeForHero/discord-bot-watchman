@@ -57,7 +57,7 @@
 			{:else}
 				<!--<Auth class="text-center" settings="{settings}"/>-->
 				<Router url="{url}">
-					<Route path="online/:id" let:params>
+					<Route path="view/:id" let:params>
 						<Online serverID="{params.id}"/>
 					</Route>
 				</Router>

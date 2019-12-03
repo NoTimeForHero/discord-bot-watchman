@@ -9,7 +9,7 @@ const Utils = require('./classes/utils.js');
 const WebServer = require('./classes/webserver.js');
 const Online = require('./classes/online.js');
 
-const database = new Database(settings.mongodb);
+const database = new Database(settings);
 const Container = {
     database,
     settings,
@@ -24,10 +24,17 @@ async function onReady() {
     //console.log('Attached guilds: ' + guilds.map(x => `"${x.name}"`).join(', '));
     //console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
 
-    const guilds = [...client.guilds.values()];
-    console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
- 
+    //const guilds = [...client.guilds.values()];
+    //console.log(guilds.map(x => ({[`${x.name}`]: `${x.id}`})));
+    
     await database.connect();
+
+    const server = client.guilds.get(settings.debug.server);
+    const online = new Online(Container);
+
+    const data = await online.get(server);
+    console.log(data);
+    //online.update(server, 600);
 }
   
 client.on('message', ev => {    

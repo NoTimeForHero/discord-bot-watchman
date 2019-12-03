@@ -29,34 +29,15 @@
     }, []);
   };
 
-  const applyOnline = (data) => {
-    const year = moment().format('YYYY');
-    const dayNo = moment().dayOfYear();
-    const weekNo = moment().week();
-
-    return (id) => {
-        const current = data[id];
-        if (!current) return {};
-        // TODO: Переписать эту жесть на стороне сервера
-        return ['online', 'voice'].reduce((arr, prop)=>{
-            arr[prop] = {
-                day: current.days[year] && current.days[year][dayNo] && current.days[year][dayNo][prop] ? current.days[year][dayNo][prop] : undefined,
-                week: current.weeks[year] && current.weeks[year][weekNo] && current.weeks[year][weekNo][prop] ? current.weeks[year][weekNo][prop] : undefined,
-                last: current[prop]
-            };
-            return arr;
-        }, {});
-    }      
-  }
-
   onMount(async () => {
     const getData = fetch(window.urlAPI + "server/" + serverID).then(x => x.json());
     const getOnline = fetch(window.urlAPI + "online/" + serverID).then(x => x.json());
 
     const [data, online] = await Promise.all([getData, getOnline]);
-    const userOnline = applyOnline(online);
 
-    users = data.users.map(user => Object.assign(user, userOnline(user.id)));
+    console.log(online);
+
+    users = data.users.map(user => Object.assign(user, online[user.id]));
     server = data.server;
   });
 </script>

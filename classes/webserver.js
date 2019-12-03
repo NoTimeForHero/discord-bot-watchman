@@ -46,10 +46,7 @@ class WebServer {
             res.send({error: `Discord server with id '${serverID}' not found!`});
             return;
         }
-        const online = await this.online.get(server).then(user => user.reduce((arr, el)=>{
-            arr[el.user] = el;
-            return arr;
-        }, {}));
+        const online = await this.online.get(server);
         res.send(online);  
     }
 
