@@ -1,14 +1,17 @@
 <script>
 	import { onMount } from 'svelte';
 	import { Router, Link, Route } from "svelte-routing";
+	import axios from 'axios';
 
 	import Auth from './Auth.svelte';
 	import Online from './Online.svelte';
+	import Servers from './Servers.svelte';
 
 	let url;
 	let isReady = false;
 	let discordLink = 'kek';
 	let settings = null;	
+	let session = null;
 
 	function getDiscordLink(settings) {
 		let params = {
@@ -21,28 +24,20 @@
 		return 'https://discordapp.com/api/oauth2/authorize?' + params;
 	}
 
+	function setSession(event) {
+		const data = event.detail;
+		session = data.session;
+		localStorage.setItem('session', session);
+	}
+
 	onMount(async()=> {		
-		settings = await fetch(window.urlAPI + 'settings.json').then(x => x.json());
+		session = localStorage.getItem('session');
+		settings = await axios.get(window.urlAPI + 'settings.json').then(x => x.data);
 		isReady = true;
 	});
 
 </script>
 
-<!--
-<Router url="{url}">
-<nav>
-	<Link to="/">Home</Link>
-	<Link to="test1">About</Link>
-	<Link to="test2">Blog</Link>
-</nav>
-<div>
-	<Route path="/"><h1>Main page</h1></Route>
-	<Route path="test1" component="{Test1}" />		
-	<Route path="test2" component="{Test2}" />		
-</div>
-</Router>
--->
-<!-- Page Content -->
 <div class="container">
 	<div class="row">
 		<div class="col-lg-12">
@@ -51,16 +46,21 @@
 					<h3>Загрузка приложения</h3>
 				</div>
 				<div class="progress">
-					<div class="progress-bar progress-bar-striped progress-bar-animated"
-						role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+					<div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
 				</div>
 			{:else}
-				<!--<Auth class="text-center" settings="{settings}"/>-->
-				<Router url="{url}">
-					<Route path="view/:id" let:params>
-						<Online serverID="{params.id}"/>
-					</Route>
-				</Router>
+				{#if !session}
+					<Auth settings="{settings}" on:login="{setSession}"/>
+				{:else}
+					<Router url="{url}">
+						<Route path="/">
+							<Servers />
+						</Route>
+						<Route path="view/:id" let:params>
+							<Online serverID="{params.id}"/>
+						</Route>
+					</Router>
+				{/if}
 			{/if}
 		</div>
 	</div>

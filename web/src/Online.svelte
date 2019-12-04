@@ -161,14 +161,14 @@
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Сегодня
                 </td>
-                <th>{user.online.day ? humanizer(user.online.day*1000) : '??? '}</th>
+                <th>{user.online.day ? humanizer(user.online.day*1000) : 'не был'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'online.week'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                
                   Неделя
                 </td>
-                <th>{user.online.week ? humanizer(user.online.week*1000) : '???'}</th>
+                <th>{user.online.week ? humanizer(user.online.week*1000) : 'не был'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'online.last'}>
@@ -192,14 +192,14 @@
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Сегодня
                 </td>
-                <th>{user.voice.day ? humanizer(user.voice.day*1000) : '???'}</th>
+                <th>{user.voice.day ? humanizer(user.voice.day*1000) : 'не был'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'voice.week'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Неделя
                 </td>
-                <th>{user.voice.week ? humanizer(user.voice.week*1000) : '???'}</th>
+                <th>{user.voice.week ? humanizer(user.voice.week*1000) : 'не был'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'voice.last'}>
