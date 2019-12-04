@@ -1,9 +1,12 @@
 <script> 
+  export let session;
   export let serverID;
+
   import { onMount } from "svelte";
   import moment from "moment";
   import "moment/locale/ru";
   moment.locale("ru");
+  import axios from "axios";
 
   import humanizeDuration from 'humanize-duration';
   const humanizer = humanizeDuration.humanizer({ language: 'ru', round: true, delimiter: ' '})
@@ -13,6 +16,7 @@
   let server = null;
   let users = null;
   let filterRole = null;
+  let error = null;
 
   let filters = {
     role: null
@@ -52,10 +56,14 @@
     return a > b ? -1 : 1;
   }
 
-  onMount(async () => {
-    const data = await fetch(window.urlAPI + "server/" + serverID).then(x => x.json());
-    users = data.users;
-    server = data.server;
+  onMount(async () => {    
+    try {
+      const data = await axios.get(window.urlAPI + "server/" + serverID, {headers: {'X-Session': session}}).then(x => x.data);
+      users = data.users;
+      server = data.server;      
+    } catch (ex) {
+      error = ex.response && ex.response.data ? ex.response.data : ex.message;
+    }
   });
 </script>
 
@@ -93,11 +101,24 @@
   .fa-sort {
     color: darkorange;
   }
+
+  .server-name {
+    color: white;
+    font-weight: bold;
+  }
 </style>
 
 <div class="mt-5">
+  {#if error}
+		<div class="alert alert-danger mt-3" role="alert">
+			<strong>Ошибка</strong>: {JSON.stringify(error)}
+		</div>
+  {/if}
   {#if users}
-    <h2>Данные по онлайну сервера: {server.name}</h2>
+    <h2>
+      <a title='Вернуться к списку серверов' href='/' style="color: aqua"><i class="fa fa-reply" aria-hidden="true"></i></a>
+      Онлайн сервера: <span class="server-name">{server.name}</span>
+    </h2>
 
     <div class="mt-3">
       {#if filters.role}

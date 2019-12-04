@@ -94,12 +94,23 @@ class WebServer {
     }
 
     async getServer(req, res) {
+
+        const user = await this.__getSession(req, res);
+        if (!user) return;        
+
         const serverID = req.params.server;    
         const server = this.discord.guilds.get(serverID);
         if (!server) {
             res.status(500);
             res.send({error: `Discord server with id '${serverID}' not found!`});
             return;
+        }
+        
+        const isUserOnServer = !!server.members.get(user);
+        if (!isUserOnServer) {
+            res.status(403);
+            res.send({error: `You don't have permission to this server!`});
+            return ;
         }
 
         const online = await this.online.get(server);        
