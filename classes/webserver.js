@@ -36,11 +36,40 @@ class WebServer {
         app.get('/settings.json', this.getSettings.bind(this));
         app.get('/server/:server', this.getServer.bind(this))
         app.post('/login', this.login.bind(this));
+        app.get('/servers', this.listServers.bind(this));
         app.use(express.static(staticDir));        
                 
         const port = this.settings.webserver.port || 3000
         app.listen(port, () => console.log(`Express.JS listening on port ${port}!`));    
         this.app = app;
+    }
+
+    async __getSession(req, res) {
+        const session = req.get('X-Session');
+        if (!session) {
+            res.status(500);
+            res.send({error: 'missing_session_header', error_description: 'X-Session header is missing!'});
+            return null;
+        }
+        const result = await this.database.findSession(session);
+        if (!result) {
+            res.status(400);
+            res.send({error: 'invalid_session', error_description: 'Invalid session!'});
+            return null;
+        }
+        return result.userid;
+    }
+
+    async listServers(req, res) {
+        const user = await this.__getSession(req, res);
+        if (!user) return;
+
+        const allServers = await this.utils.getEnabledServers(this.database, this.discord);
+        const servers = Object.values(allServers)
+            .filter(x => x.members.get(user))
+            .map(x => ({id: x.id, name: x.name}));
+
+        res.send({ servers });
     }
 
     async login(req, res) {

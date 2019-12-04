@@ -1,11 +1,22 @@
 <script>
+  export let session;
+  import axios from 'axios';
   import { onMount } from "svelte";
-  let isLoading = true;
-  let servers = [
 
-  ];
+  let error;
+  let isLoading = true;
+  let servers = [];
 
   onMount(async()=>{
+
+    try {
+      const response = await axios.get(window.urlAPI + 'servers', { headers: { 'X-Session': session }});
+      servers = response.data.servers;
+    } catch (ex) {
+      error = ex.response && ex.response.data ? ex.response.data : ex.message;
+    } finally {
+      isLoading = false;      
+    }
 
   });
 </script>
@@ -15,7 +26,7 @@
     <h1 class="mt-3 mb-3">Доступные сервера:</h1>
     {#each servers as server}
       <a class="btn btn-primary btn-large m-1" href="/view/{server.id}">
-        {server.title}
+        {server.name}
       </a>
     {/each}
   {:else}
@@ -29,4 +40,9 @@
         style="width: 100%" />
     </div>
   {/if}
+		{#if error}
+		<div class="alert alert-danger mt-3" role="alert">
+			<strong>Ошибка</strong>: {JSON.stringify(error)}
+		</div>
+		{/if}  
 </div>

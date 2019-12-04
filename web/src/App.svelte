@@ -9,7 +9,6 @@
 
 	let url;
 	let isReady = false;
-	let discordLink = 'kek';
 	let settings = null;	
 	let session = null;
 
@@ -54,10 +53,10 @@
 				{:else}
 					<Router url="{url}">
 						<Route path="/">
-							<Servers />
+							<Servers session="{session}"/>
 						</Route>
 						<Route path="view/:id" let:params>
-							<Online serverID="{params.id}"/>
+							<Online session="{session}" serverID="{params.id}"/>
 						</Route>
 					</Router>
 				{/if}
