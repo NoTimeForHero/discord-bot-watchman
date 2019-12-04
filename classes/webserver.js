@@ -31,16 +31,21 @@ class WebServer {
         const staticDir = this.settings.webserver.static || 'public';
         console.log(`Directory with static files: ${staticDir}`);
 
+
+        let indexHTML = fs.readFileSync(path.join(staticDir, 'index.html'))
+            .toString().replace(/(window.urlAPI\W*=\W*['"])[^"']+(['"];?)/, "$1/$2");
+
         app.use(bodyParser.json());
-        app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), staticDir, 'index.html')));
         app.get('/settings.json', this.getSettings.bind(this));
         app.get('/server/:server', this.getServer.bind(this))
         app.post('/login', this.login.bind(this));
         app.get('/servers', this.listServers.bind(this));
+        app.get('/', (_, res) => res.send(indexHTML));
         app.use(express.static(staticDir));        
+        app.get('/*', (_, res) => res.send(indexHTML));
                 
         const port = this.settings.webserver.port || 3000
-        app.listen(port, () => console.log(`Express.JS listening on port ${port}!`));    
+        app.listen(port,     () => console.log(`Express.JS listening on port ${port}!`));    
         this.app = app;
     }
 
