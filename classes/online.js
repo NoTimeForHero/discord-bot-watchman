@@ -14,7 +14,6 @@ class Online {
             arr[keys[0]] = el[keys[0]];
             return arr;
         }, {});
-        console.log(data);
         return data;
     }
 

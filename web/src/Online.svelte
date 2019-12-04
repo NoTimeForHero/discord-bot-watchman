@@ -29,9 +29,28 @@
       arr.push(user);
       return arr;
     }, []);
-    if (sortBy) return lodash.sortBy(data, sortBy);
+    if (sortBy) return data.sort(sorter.bind(null, sortBy));
     return data;
   };
+
+  const sorter = (key, a, b) => {
+    a = lodash.get(a, key);
+    b = lodash.get(b, key);
+
+    if (key.match(/^\w+\.(?:day|week)$/)) {      
+      a = parseInt(a);
+      b = parseInt(b);
+    }
+
+    if (key.match(/^\w+\.last$/) || key === 'joinedAt') {
+      a = a ? moment(a).unix() : null;
+      b = b ? moment(b).unix() : null;
+    }
+
+    if (!isFinite(a) || !a) return 1;
+    if (!isFinite(b) || !b) return -1;
+    return a > b ? -1 : 1;
+  }
 
   onMount(async () => {
     const data = await fetch(window.urlAPI + "server/" + serverID).then(x => x.json());
@@ -67,6 +86,10 @@
       border:none;
   }
 
+  .table_online th {
+    color: palevioletred;
+  }
+
   .fa-sort {
     color: darkorange;
   }
@@ -88,6 +111,9 @@
             {filters.role.name}
           </a>
         </h4>
+      {/if}
+      {#if sortBy}
+        <button class="btn btn-primary mt-3" on:click={()=>sortBy=null}>Сбросить сортировку</button>
       {/if}
     </div>
 
@@ -128,28 +154,28 @@
             {/each}
           </td>
           <td>     
-            <table class="noborder">
+            <table class="noborder table_online">
               {#if user.online}     
               <tr>
                 <td on:click={() => sortBy = 'online.day'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Сегодня
                 </td>
-                <th>{user.online.day ? humanizer(user.online.day*1000) : 'неизвестно'}</th>
+                <th>{user.online.day ? humanizer(user.online.day*1000) : '??? '}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'online.week'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                
                   Неделя
                 </td>
-                <th>{user.online.week ? humanizer(user.online.week*1000) : 'неизвестно'}</th>
+                <th>{user.online.week ? humanizer(user.online.week*1000) : '???'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'online.last'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                   
                   Был в сети
                 </td>
-                <th>{user.online.last ? moment(user.online.last).fromNow() : 'неизвестно'}</th>
+                <th>{user.online.last ? moment(user.online.last).fromNow() : '???'}</th>
               </tr>
             {:else}           
             <tr>
@@ -159,28 +185,28 @@
             </table>          
           </td>
           <td>
-            <table class="noborder">
+            <table class="noborder table_online">
               {#if user.voice}            
               <tr>
                 <td on:click={() => sortBy = 'voice.day'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Сегодня
                 </td>
-                <th>{user.voice.day ? humanizer(user.voice.day*1000) : 'неизвестно'}</th>
+                <th>{user.voice.day ? humanizer(user.voice.day*1000) : '???'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'voice.week'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;
                   Неделя
                 </td>
-                <th>{user.voice.week ? humanizer(user.voice.week*1000) : 'неизвестно'}</th>
+                <th>{user.voice.week ? humanizer(user.voice.week*1000) : '???'}</th>
               </tr>
               <tr>
                 <td on:click={() => sortBy = 'voice.last'}>
                   <i class="fa fa-sort" aria-hidden="true"></i>&nbsp;                   
                   Был в сети
                 </td>
-                <th>{user.voice.last ? moment(user.voice.last).fromNow() : 'неизвестно'}</th>
+                <th>{user.voice.last ? moment(user.voice.last).fromNow() : '???'}</th>
               </tr>
                 {:else}           
                 <tr>
