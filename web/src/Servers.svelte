@@ -1,12 +1,13 @@
 <script>
   export let session;
   import axios from 'axios';
-  import { onMount } from "svelte";
+  import { onMount, createEventDispatcher } from "svelte";
 
   let error;
   let isLoading = true;
   let servers = [];
 
+  const dispatch = createEventDispatcher();
   onMount(async()=>{
 
     try {
@@ -24,11 +25,14 @@
 <div class="col-lg-12 text-center">
   {#if !isLoading}
     <h1 class="mt-3 mb-3">Доступные сервера:</h1>
+    <div class="servers mb-4">
     {#each servers as server}
       <a class="btn btn-primary btn-large m-1" href="/view/{server.id}">
         {server.name}
       </a>
     {/each}
+    </div>    
+    <button class="btn btn-danger" on:click="{() => dispatch('logout', true)}">Выйти из аккаунта</button>
   {:else}
     <div class="mt-5 mb-3">
       <h3>Загрузка списка доступных вам серверов</h3>

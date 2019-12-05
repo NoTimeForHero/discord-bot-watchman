@@ -29,6 +29,11 @@
 		localStorage.setItem('session', session);
 	}
 
+	function delSession(event) {
+		localStorage.removeItem('session');
+		session = null;
+	}
+
 	onMount(async()=> {		
 		session = localStorage.getItem('session');
 		settings = await axios.get(window.urlAPI + 'settings.json').then(x => x.data);
@@ -53,7 +58,7 @@
 				{:else}
 					<Router url="{url}">
 						<Route path="/">
-							<Servers session="{session}"/>
+							<Servers session="{session}" on:logout="{delSession}" />
 						</Route>
 						<Route path="view/:id" let:params>
 							<Online session="{session}" serverID="{params.id}"/>
