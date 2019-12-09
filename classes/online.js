@@ -18,13 +18,18 @@ class Online {
     }
 
     async update(server, addedTime) {
-        let users = [...server.members.values()].map(user => ({
-            id: user.id,
-            name: user.displayName,
-            online: user.presence.status !== 'offline',
-            voice: !!user.voiceChannel
-        }));    
-        return await this.database.updateOnline(server.id, users, 60);
+        const afkChannel = server.afkChannelID;
+        let users = [...server.members.values()].map(user => {
+            let voice = !!user.voiceChannel;
+            if (afkChannel && user.voiceChannelID === afkChannel) voice = false;
+            return {
+                id: user.id,
+                name: user.displayName,
+                online: user.presence.status !== 'offline',
+                voice
+            }
+        });    
+        return await this.database.updateOnline(server.id, users, addedTime);
     }
 
 }
