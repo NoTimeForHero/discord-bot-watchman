@@ -16,6 +16,10 @@ class Commands {
             'help': {
                 'allowed_in_PM': true,
                 'function': this.help
+            },
+            'version': {
+                'allowed_in_PM': true,
+                'function': this.getVersion
             },            
             'uptime': {
                 'allowed_in_PM': true,
@@ -88,6 +92,10 @@ class Commands {
         const date = this.moment(this.botState.startedAt).fromNow();
         ev.reply(this.i18n.__('uptime_message', date));
     }
+
+    getVersion(ev) {
+        ev.reply(this.i18n.__('bot_version', this.botState.version));
+    }    
 
     help(ev) {
         const isAllowedInPm = ([_, options]) => {

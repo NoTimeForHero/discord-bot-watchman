@@ -54,6 +54,7 @@ const Container = {
 };
 Container.database = new Database(Container, settings);
 Container.botState = {
+    version,
     startedAt: new Date()
 }
 

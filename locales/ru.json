@@ -31,5 +31,7 @@
 	"command_description_watched": "Управление списком наблюдаемых пользователей",
 	"command_description_watched_list": "Посмотреть список наблюдаемых пользователей",
 	"command_description_watched_set": "Установить список наблюдаемых пользователей",
-	"command_description_dashboard": "Выводить на текущем канале информацию от бота"
+	"command_description_dashboard": "Выводить на текущем канале информацию от бота",
+	"command_description_version": "Показывает текущую версию бота",
+	"bot_version": "Текущая версия: %s"
 }
