@@ -40,8 +40,8 @@ class WebServer {
         app.use(bodyParser.json());
         app.use((req,res,next)=>{
             if (this.logger.level !== 'silly') {
+                next();                
                 return;
-                next();
             }
             const userAgent = req.header('User-Agent');
             const ip = req.header('X-Real-IP') || req.ip;

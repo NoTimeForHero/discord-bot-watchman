@@ -10,7 +10,7 @@ const settings = JSON.parse(fs.readFileSync('settings.json'));
 const getLogger = (label) => {
     const loggerFormat = x => `[${moment(x.timestamp).format('YYYY.MM.DD HH:mm:ss:SSSS')}][${x.label}][${x.level}] ${x.message}`;
     const logger = winston.createLogger({
-        level: 'silly',
+        level: settings.loglevel || 'info',
         format: winston.format.combine(
             winston.format.colorize({all: true}),
             winston.format.label({label}),
