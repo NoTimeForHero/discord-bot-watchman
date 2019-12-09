@@ -9,6 +9,7 @@
         "port": 5000,
         "static": "web"
     },
+    "loglevel": "info",
     "mongodb": "mongodb://localhost:27017/discord_bot_watchman",
     "nedb": "database/",
     "redis": "redis://localhost:6379/2",

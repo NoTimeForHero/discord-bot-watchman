@@ -7,6 +7,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors');
+require('express-async-errors');
 
 class DiscordApiError extends Error {}
 
@@ -20,6 +21,7 @@ class WebServer {
         this.database = container.database;
         this.settings = settings;
         this.isDebug = settings.mode !== 'production';
+        this.logger = container.loggerFactory.getLogger('WebServer');
     }
 
     async start() {
@@ -29,13 +31,23 @@ class WebServer {
         if (this.isDebug) app.use(cors());
 
         const staticDir = this.settings.webserver.static || 'public';
-        console.log(`Directory with static files: ${staticDir}`);
+        this.logger.info(`Directory with static files: ${staticDir}`);
 
 
         let indexHTML = fs.readFileSync(path.join(staticDir, 'index.html'))
             .toString().replace(/(window.urlAPI\W*=\W*['"])[^"']+(['"];?)/, "$1/$2");
 
         app.use(bodyParser.json());
+        app.use((req,res,next)=>{
+            if (this.logger.level !== 'silly') {
+                return;
+                next();
+            }
+            const userAgent = req.header('User-Agent');
+            const ip = req.header('X-Real-IP') || req.ip;
+            this.logger.silly(`[${ip}] ${req.method} "${req.path}"  ${userAgent}`);
+            next();
+        });
         app.get('/settings.json', this.getSettings.bind(this));
         app.get('/server/:server', this.getServer.bind(this))
         app.post('/login', this.login.bind(this));
@@ -43,9 +55,16 @@ class WebServer {
         app.get('/', (_, res) => res.send(indexHTML));
         app.use(express.static(staticDir));        
         app.get('/*', (_, res) => res.send(indexHTML));
+
+        app.use((err, req, res, next)=>{
+            const errClass = err.constructor ? err.constructor.name : typeof err;
+            this.logger.error(`Error "${errClass}" on ${req.method} endpoint "${req.path}": ${err.message}`)
+            this.logger.debug(err.stack);
+            res.status(500).send('{error: "Internal Server Error!"}');
+        });
                 
         const port = this.settings.webserver.port || 3000
-        app.listen(port,     () => console.log(`Express.JS listening on port ${port}!`));    
+        app.listen(port, () => this.logger.info(`Express.JS listening on port ${port}!`));    
         this.app = app;
     }
 

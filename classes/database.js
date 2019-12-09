@@ -4,8 +4,8 @@ const moment = require('moment');
 const uuidv4 = require('uuid/v4');
 
 class Database {    
-    constructor(settings) {
-        this.redis = asyncRedis.createClient({url: settings.redis}); 
+    constructor(container, settings) {
+        this.settings = settings;
         this.User = Datastore({filename: settings.nedb + 'user.db'});
         this.Server = Datastore({filename: settings.nedb + 'server.db'});
         this.Server.ensureIndex({fieldName: 'server', unique: true});
@@ -13,11 +13,15 @@ class Database {
         this.Sessions = Datastore({filename: settings.nedb + 'sessions.db'});        
         this.Sessions.ensureIndex({fieldName: 'userid', unique: false});
         this.Sessions.ensureIndex({fieldName: 'token', unique: true});
+        this.logger = container.loggerFactory.getLogger('Database');
     }
 
     async connect() {
         //const loadDb = (database) => new Promise((fnRes,fnErr) => database.loadDatabase((err)=> err ? fnErr(err) : fnRes()));
         //const stores = [this.User, this.Server].map(x => loadDb(x));
+        this.redis = asyncRedis.createClient({url: this.settings.redis});
+        await this.redis.get('test'); // for test connection error     
+
         const stores = [this.User, this.Server, this.Sessions].map(x => x.loadDatabase());
         await Promise.all(stores);
     }

@@ -2,9 +2,30 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const moment = require('moment');
 const i18n = require('i18n');
+const winston = require('winston');
 
 const { version } = JSON.parse(fs.readFileSync('package.json'));
 const settings = JSON.parse(fs.readFileSync('settings.json'));
+
+const getLogger = (label) => {
+    const loggerFormat = x => `[${moment(x.timestamp).format('YYYY.MM.DD HH:mm:ss:SSSS')}][${x.label}][${x.level}] ${x.message}`;
+    const logger = winston.createLogger({
+        level: 'silly',
+        format: winston.format.combine(
+            winston.format.colorize({all: true}),
+            winston.format.label({label}),
+            winston.format.timestamp(),
+            winston.format.printf(loggerFormat)
+        ),
+        transports: [
+            new winston.transports.Console(),
+        ],
+    });
+    return logger;
+}
+
+const logger = getLogger("main.js");
+logger.info("Application has been started!");
 
 const client = new Discord.Client();
 const Security = require('./classes/security.js');
@@ -21,25 +42,23 @@ i18n.configure({
     directory: __dirname + '/locales'
 });
 
-const database = new Database(settings);
-const botState = {
-    startedAt: new Date()
-}
-
 const Container = {
     i18n,
     prefix: null,
     security: null,
     commandHandler: null,
-    database,
     settings,
-    botState,
     admins: settings.admins,
-    moment
+    moment,
+    loggerFactory: { getLogger }
 };
+Container.database = new Database(Container, settings);
+Container.botState = {
+    startedAt: new Date()
+}
 
 async function onReady() {
-    console.log(`Logged in as ${client.user.tag} (${client.user.id})!`);
+    logger.info(`Logged in as ${client.user.tag} (${client.user.id})!`);
     //prefix = `<@${client.user.id}>`;
     Container.discord = client;    
     Container.prefix = settings.prefix;
@@ -52,12 +71,17 @@ async function onReady() {
     Container.webserver.start();
 
     const updateOnline = async() =>{
-        const servers = await Utils.getEnabledServers(database, client);
-        Object.values(servers).forEach(server => {
-            console.log(`Updating online of server: ${server.name}`);
-            Container.online.update(server, 60);
-        });
-        console.log(`Updating online is finished!`);
+        try {
+            const servers = await Utils.getEnabledServers(Container.database, client);
+            Object.values(servers).forEach(server => {
+                logger.debug(`Updating online of server: ${server.name}`);
+                Container.online.update(server, 60);
+            });
+            logger.info(`Updating online is finished!`);
+        } catch (err) {
+            logger.error(`Error occured during online update!`);
+            logger.error(err.stack);
+        }
     };
     setInterval(updateOnline, 60 * 1000);
     updateOnline();
@@ -67,6 +91,6 @@ client.on('message', ev => Container.commandHandler.onCommand(ev));
 client.on('ready', onReady);
 
 (async() => {
-    await database.connect();
+    await Container.database.connect();
     client.login(settings.discord.bot_token);
 })();
