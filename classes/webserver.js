@@ -85,15 +85,22 @@ class WebServer {
     }
 
     async listServers(req, res) {
-        const user = await this.__getSession(req, res);
-        if (!user) return;
+        const uid = await this.__getSession(req, res);
+        if (!uid) return;
 
         const allServers = await this.utils.getEnabledServers(this.database, this.discord);
         const servers = Object.values(allServers)
-            .filter(x => x.members.get(user))
+            .filter(x => x.members.get(uid))
             .map(x => ({id: x.id, name: x.name}));
+            
+        const user = await this.discord.fetchUser(uid)
+            .then(user => ({name: user.tag, avatar: user.displayAvatarURL}));            
 
-        res.send({ servers });
+        const data = {
+            user,
+            servers
+        }
+        res.send(data);
     }
 
     async login(req, res) {
