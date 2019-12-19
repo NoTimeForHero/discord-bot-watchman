@@ -68,7 +68,7 @@
     console.log(data);
     Highcharts.stockChart('chart_container', {
         rangeSelector: {
-            selected: 1
+            selected: 0
         },
         title: {
             text: `Онлайн ${user.name}`

@@ -47,8 +47,8 @@ class Database {
         const data = sections
             .map(section => days.map(day => `${server_id}.${user_id}.${section}.year_${year}.day_${day+1}`))
             .map(group => this.redis.mget(group).then(group => group.reduce( (arr, val, index) => {
-                if (!val) return arr;
-                const timestamp = date.dayOfYear(index).startOf('day').unix() * 1000;
+                if (!val) val = "0";
+                const timestamp = moment().dayOfYear(index).startOf('day').unix() * 1000;
                 arr.push([timestamp, parseInt(val)]);
                 return arr;
             }, [])));
