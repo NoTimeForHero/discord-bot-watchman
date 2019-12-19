@@ -49,7 +49,8 @@ class WebServer {
             next();
         });
         app.get('/settings.json', this.getSettings.bind(this));
-        app.get('/server/:server', this.getServer.bind(this))
+        app.get('/server/:server', this.getServer.bind(this));
+        app.get('/online/:server/:user', this.getUserOnline.bind(this));
         app.post('/login', this.login.bind(this));
         app.get('/servers', this.listServers.bind(this));
         app.get('/', (_, res) => res.send(indexHTML));
@@ -82,6 +83,28 @@ class WebServer {
             return null;
         }
         return result.userid;
+    }
+
+    async __getServer(req, res) {
+        const user = await this.__getSession(req, res);
+        if (!user) return null;        
+
+        const serverID = req.params.server;    
+        const server = this.discord.guilds.get(serverID);
+        if (!server) {
+            res.status(500);
+            res.send({error: `Discord server with id '${serverID}' not found!`});
+            return null;
+        }
+        
+        const isUserOnServer = !!server.members.get(user);
+        if (!isUserOnServer) {
+            res.status(403);
+            res.send({error: `You don't have permission to this server!`});
+            return server;
+        }
+
+        return server;
     }
 
     async listServers(req, res) {
@@ -124,25 +147,18 @@ class WebServer {
         }
     }
 
+    async getUserOnline(req, res) {                
+        const server = await this.__getServer(req, res);
+        if (!server) return;
+
+        const user_id = req.params.user;        
+        const online = await this.online.getYearByUser(server.id, user_id);
+        res.send(online);
+    }
+
     async getServer(req, res) {
-
-        const user = await this.__getSession(req, res);
-        if (!user) return;        
-
-        const serverID = req.params.server;    
-        const server = this.discord.guilds.get(serverID);
-        if (!server) {
-            res.status(500);
-            res.send({error: `Discord server with id '${serverID}' not found!`});
-            return;
-        }
-        
-        const isUserOnServer = !!server.members.get(user);
-        if (!isUserOnServer) {
-            res.status(403);
-            res.send({error: `You don't have permission to this server!`});
-            return ;
-        }
+        const server = await this.__getServer(req, res);
+        if (!server) return;
 
         const online = await this.online.get(server);        
         const info = await this.utils.getServerInfo(server);

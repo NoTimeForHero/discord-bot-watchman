@@ -17,6 +17,10 @@ class Online {
         return data;
     }
 
+    async getYearByUser(sid, uid) {
+        return this.database.getYearOnline(sid, uid);
+    }
+
     async update(server, addedTime) {
         const afkChannel = server.afkChannelID;
         let users = [...server.members.values()].map(user => {

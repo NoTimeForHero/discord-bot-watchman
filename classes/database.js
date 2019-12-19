@@ -36,6 +36,28 @@ class Database {
         return this.Sessions.findOne({token});
     }
 
+    async getYearOnline(server_id, user_id) {
+        const date = moment();
+        const year = date.format('YYYY');
+        const dayNo = date.dayOfYear();
+
+        const sections = ['voice', 'online'];
+        const days = [...Array(dayNo).keys()];
+
+        const data = sections
+            .map(section => days.map(day => `${server_id}.${user_id}.${section}.year_${year}.day_${day+1}`))
+            .map(group => this.redis.mget(group).then(group => group.reduce( (arr, val, index) => {
+                if (!val) return arr;
+                arr[index] = val;
+                return arr;
+            }, {})));
+        return Promise.all(data).then(result => result.reduce((arr,value,index) => {
+            console.log(arr,value,index);
+            arr[sections[index]] = value;
+            return arr;
+        }, {}));
+    }
+
     getOnline(server_id, users_ids) {
         const date = moment();
         const year = date.format('YYYY');
