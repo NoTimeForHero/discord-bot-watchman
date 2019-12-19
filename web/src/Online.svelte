@@ -2,14 +2,14 @@
   export let session;
   export let serverID;
 
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import moment from "moment";
   import "moment/locale/ru";
   moment.locale("ru");
   import axios from "axios";
 
   import humanizeDuration from 'humanize-duration';
-  const humanizer = humanizeDuration.humanizer({ language: 'ru', round: true, delimiter: ' '})
+  const humanizer = humanizeDuration.humanizer({ language: 'ru', round: true, delimiter: ' ', units: ['h', 'm', 's']})
 
   import lodash from "lodash";
 
@@ -22,6 +22,7 @@
     role: null
   };
   let sortBy = null;
+  let yearOnline = null;
 
   $: getFilteredUsers = users => {
     if (!users) return [];
@@ -56,7 +57,75 @@
     return a > b ? -1 : 1;
   }
 
+  const wait = timeout => new Promise(resolve => setTimeout(resolve, timeout));
+
+  const getUserOnline = async user => {
+    const url = window.urlAPI + "online/" + serverID + "/" + user.id;
+    const data = await axios.get(url, {headers: {'X-Session': session}}).then(x => x.data);
+
+    yearOnline = user.id;
+    await tick();
+    console.log(data);
+    Highcharts.stockChart('chart_container', {
+        rangeSelector: {
+            selected: 1
+        },
+        title: {
+            text: `Онлайн ${user.name}`
+        },
+        xAxis: {
+          crosshair: true
+        },
+        tooltip: {
+          formatter: function () {
+            const title = moment.unix(this.x/1000).format('DD MMMM YYYY<br/><br/>');
+            return this.points.reduce((title, point) => {
+              title += `<span style="color: ${point.color}">${point.series.name}:</span>` + humanizer(point.y*1000) + '<br/>';
+              return title;
+            }, title);
+          },
+          shared: true
+        },
+        series: [
+          {
+            name: 'Discord',
+            data: data.online,
+            tooltip: {
+                valueDecimals: 2
+            }
+          },
+          {
+              name: 'Voice',
+              data: data.voice,
+              tooltip: {
+                  valueDecimals: 2
+              }
+          }
+        ]
+    });
+  }
+
   onMount(async () => {    
+
+    Highcharts.setOptions({
+        lang: {
+                loading: 'Загрузка...',
+                months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+                weekdays: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+                shortMonths: ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сент', 'Окт', 'Нояб', 'Дек'],
+                exportButtonTitle: "Экспорт",
+                printButtonTitle: "Печать",
+                rangeSelectorFrom: "С",
+                rangeSelectorTo: "По",
+                rangeSelectorZoom: "Период",
+                downloadPNG: 'Скачать PNG',
+                downloadJPEG: 'Скачать JPEG',
+                downloadPDF: 'Скачать PDF',
+                downloadSVG: 'Скачать SVG',
+                printChart: 'Напечатать график'   
+            }        
+    });
+
     try {
       const data = await axios.get(window.urlAPI + "server/" + serverID, {headers: {'X-Session': session}}).then(x => x.data);
       users = data.users;
@@ -160,6 +229,11 @@
               <i class="fa fa-sort" aria-hidden="true"></i>
               {moment(user.joinedAt).format('DD MMMM YYYY')}
             </span>
+            <button
+              class="mt-3 btn {yearOnline === user.id ? 'btn-info' : 'btn-outline-info'} btn-sm"
+              on:click={() => yearOnline === user.id ? yearOnline = null : getUserOnline(user)}>
+              Онлайн за год
+            </button>
           </td>
           <td>
             {#each user.roles as role}
@@ -237,6 +311,14 @@
             </table>
           </td>
         </tr>
+        {#if yearOnline === user.id}
+          <tr>
+            <td colspan="4">
+              <div id="chart_container" style="height: 400px; min-width: 500px">
+              </div>
+            </td>
+          </tr>
+        {/if}
       {/each}
     </table>
   {:else}

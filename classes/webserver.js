@@ -28,6 +28,7 @@ class WebServer {
 
         var app = express();
 
+        this.logger.info(`Applicaation mode: ${this.settings.mode}`);
         if (this.isDebug) app.use(cors());
 
         const staticDir = this.settings.webserver.static || 'public';

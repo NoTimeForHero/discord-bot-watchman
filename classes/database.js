@@ -48,11 +48,11 @@ class Database {
             .map(section => days.map(day => `${server_id}.${user_id}.${section}.year_${year}.day_${day+1}`))
             .map(group => this.redis.mget(group).then(group => group.reduce( (arr, val, index) => {
                 if (!val) return arr;
-                arr[index] = val;
+                const timestamp = date.dayOfYear(index).startOf('day').unix() * 1000;
+                arr.push([timestamp, parseInt(val)]);
                 return arr;
-            }, {})));
+            }, [])));
         return Promise.all(data).then(result => result.reduce((arr,value,index) => {
-            console.log(arr,value,index);
             arr[sections[index]] = value;
             return arr;
         }, {}));
